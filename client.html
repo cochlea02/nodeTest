@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>client</title>
+	<script>
+		function XHR() {
+			var xhr;
+				try {xhr = new XMLHttpRequest();}
+				catch(e) {
+					var IEXHRVers =["Msxml3.XMLHTTP","Msxml2.XMLHTTP","Microsoft.XMLHTTP"];
+					for (var i=0,len=IEXHRVers.length;i< len;i++) {
+						try {xhr = new ActiveXObject(IEXHRVers[i]);}
+						catch(e) {continue;}
+					}
+				}
+			return xhr;
+		}
+		function getData() {
+			var xhr = XHR();
+			xhr.open('GET','http://127.0.0.1:8888/',true);
+			xhr.onreadystatechange = function(){
+				console.log(xhr.readyState,xhr.status);
+				if (xhr.readyState == 4) {
+					if (xhr.status == 200) {
+						var ores = parseRes(xhr.responseText);
+						console.log(ores);
+						boundElement(ores);
+					}
+				}
+			}
+			xhr.send(null);
+		}
+		function parseRes(data){
+			var o = JSON.parse(data);
+			return o;
+		}
+		function boundElement(data){
+			var oDiv = document.getElementById('div');
+			oDiv.innerHTML = data.retData[0].district_cn;
+		}
+	</script>
+</head>
+<body>
+	<form id='form1' action="http://127.0.0.1:1337" method="post">
+		姓名：<input type="text" name="name"><br/>
+		年龄：<input type="number" name="age">
+		<input type="submit" value="提交">	
+	</form>
+	<input type="button" value="获取数据" onClick='getData()'>
+	<div id="div"></div>
+</body>
+</html>
