@@ -2,7 +2,17 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
 	<title>client</title>
+	<style>
+		ul{
+			border:1px solid red;
+			margin-top:3px;
+		}
+		#ul1{
+			border:none;
+		}
+	</style>
 	<script>
 		function XHR() {
 			var xhr;
@@ -36,10 +46,18 @@
 		function parseRes(data){
 			var o = JSON.parse(data);
 			return o;
-		}
+		}0
 		function boundElement(data){
-			var oDiv = document.getElementById('div');
-			oDiv.innerHTML = data.retData[0].district_cn;
+			var oUl = document.getElementById('ul1');
+			var html = '';
+			for (var i =0; i<data.retData.length;i++){
+				html+='<ul>';
+				for (var k in data.retData[i]){
+					html += '<li>' +(data.retData[i])[k] + '</li>';
+				};
+				html +='</ul>';
+			}
+			oUl.innerHTML = html;
 		}
 	</script>
 </head>
@@ -50,6 +68,6 @@
 		<input type="submit" value="提交">	
 	</form>
 	<input type="button" value="获取数据" onClick='getData()'>
-	<div id="div"></div>
+	<ul id="ul1"></ul>
 </body>
 </html>
