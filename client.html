@@ -26,6 +26,8 @@
 						var ores = parseRes(xhr.responseText);
 						console.log(ores);
 						boundElement(ores);
+					} else {
+						alert('出错了，Err：' + xhr.status);
 					}
 				}
 			}
