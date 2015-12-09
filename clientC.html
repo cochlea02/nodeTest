@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+	<title>client</title>
+	<script src="./js/md5.js"></script>
+	<style>
+		ul{
+			border:1px solid red;
+			margin-top:3px;
+		}
+		#ul1{
+			border:none;
+		}
+	</style>
+	<script>
+		window.onload= function(){
+			// var paramApi = {username:'cochlea'};
+			// var paramsPublic = {
+			// 	timestamp:dateFormat(new Date()),
+			// 	appKey:'7668ebcd-20c1-49e4-8124-cbea98b6c330',
+			// 	sign: hex_md5(this.timestamp
+			// 	+this.appKey
+			// 	+this.clientType),
+			// 	clientType:3
+			// };
+			var paramsApi = [{name:'username',value:'cochlea'}];
+			var paramsPublic = [
+				{name:'timestamp',value:dateFormat(new Date())},
+				{name:'appKey',value:'7668ebcd-20c1-49e4-8124-cbea98b6c330'},
+				{name:'sign',value : hex_md5(getSignString(paramsPublic,paramsApi))},
+				{name:'clientType',value:3}
+			];
+			console.log(hex_md5(getSignString(paramsPublic,paramsApi)));
+			// console.log(paramsPublic.sort(function(a,b){return a.name>b.name}));
+
+		}
+		function arrayMerge(paramsPublic,paramApi) {
+			var pArray = [];
+			for (var key in paramsPublic){
+				pArray.push(paramsPublic[key]);
+			}
+			for (var key in paramApi){
+				pArray.push(paramApi[key]);
+			}
+			return pArray;
+		}
+		function arrayParamMerge(paramsPublic,paramApi) {
+			var pArray = [];
+			for (var key in paramsPublic){
+				if(paramsPublic[key].name == 'sign') continue;
+				pArray.push(paramsPublic[key]);
+			}
+			for (var key in paramApi){
+				pArray.push(paramApi[key]);
+			}
+			return pArray;
+		}
+		function getSignString(paramsPublic,paramApi){
+			var signString="";
+			var pArray = arrayParamMerge(paramsPublic,paramApi);
+			pArray.sort(function(a,b){
+				return a.name>b.name;
+			});
+			for(var k in pArray){
+				signString+=pArray[k].name + pArray[k].value;
+			};
+			return signString;
+		}
+		function dateFormat(myDate){
+			// var myDate = new Date();
+			var myDateArray = []
+			var myDateFormat ="";
+			myDateArray.push(myDate.getFullYear());
+			myDateArray.push(myDate.getMonth());
+			myDateArray.push(myDate.getDate());
+			myDateArray.push(myDate.getHours());
+			myDateArray.push(myDate.getMinutes());
+			myDateArray.push(myDate.getSeconds());
+			for(var i = 0; i < 3; i++){
+					if(i == 2){
+						myDateFormat+=myDateArray[i]+" ";
+					} else {
+						myDateFormat += myDateArray[i] + "-";		
+					}
+			};
+			for(var i = 3; i < myDateArray.length; i++){
+					if(i == myDateArray.length-1){
+						myDateFormat += myDateArray[i];
+						break;
+					} else {
+						myDateFormat += myDateArray[i] + ":";	
+					}				
+			};
+			return myDateFormat;
+		}
+		function XHR() {
+			var xhr;
+				try {xhr = new XMLHttpRequest();}
+				catch(e) {
+					var IEXHRVers =["Msxml3.XMLHTTP","Msxml2.XMLHTTP","Microsoft.XMLHTTP"];
+					for (var i=0,len=IEXHRVers.length;i< len;i++) {
+						try {xhr = new ActiveXObject(IEXHRVers[i]);}
+						catch(e) {continue;}
+					}
+				}
+			return xhr;
+		}
+		function getData() {
+			var xhr = XHR();
+			var paramsApi = [{name:'username',value:'cochlea'}];
+			var signValue = hex_md5(getSignString(paramsPublic,paramsApi));
+			var paramsPublic = [
+				{name:'timestamp',value:dateFormat(new Date())},
+				{name:'appKey',value:'7668ebcd-20c1-49e4-8124-cbea98b6c330'},
+				{name:'clientType',value:3}
+			];
+			var paramsSign = [{name:'sign',value:hex_md5(getSignString(paramsPublic,paramsApi))}]
+			var paramString = "";
+			var pmArray = arrayMerge(arrayMerge(paramsPublic,paramsSign),paramsApi);
+			for (var i = 0; i < pmArray.length; i++){
+				if(i == pmArray.length-1) {
+					paramString += pmArray[i].name+'='+pmArray[i].value;
+					break;
+				} 
+				paramString += pmArray[i].name+'='+pmArray[i].value+'&';
+			}
+			var url = 'http://127.0.0.1:8888?'+paramString;
+			xhr.open('GET',url,true);
+			xhr.onreadystatechange = function(){
+				console.log(xhr.readyState,xhr.status);
+				if (xhr.readyState == 4 && xhr.status == 200) {
+						var ores = parseRes(xhr.responseText);
+						console.log(ores);
+						boundElement(ores);
+				} else {
+						console.log('出错了，Err：' + xhr.status);
+				}
+			}
+			xhr.send(null);
+		}
+		function parseRes(data){
+			var o = JSON.parse(data);
+			return o;
+		}0
+		function boundElement(data){
+			var oUl = document.getElementById('ul1');
+			var html = '';
+			for (var i =0; i<data.retData.length;i++){
+				html+='<ul>';
+				for (var k in data.retData[i]){
+					html += '<li>' +(data.retData[i])[k] + '</li>';
+				};
+				html +='</ul>';
+			}
+			oUl.innerHTML = html;
+		}
+	</script>
+</head>
+<body>
+<!-- 	<form id='form1' action="http://127.0.0.1:1337" method="post">
+		姓名：<input type="text" name="name"><br/>
+		年龄：<input type="number" name="age">
+		<input type="submit" value="提交">	
+	</form> -->
+	<input type="button" value="获取数据" onClick='getData()'>
+	<ul id="ul1"></ul>
+</body>
+</html>
