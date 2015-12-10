@@ -15,27 +15,6 @@
 		}
 	</style>
 	<script>
-		window.onload= function(){
-			// var paramApi = {username:'cochlea'};
-			// var paramsPublic = {
-			// 	timestamp:dateFormat(new Date()),
-			// 	appKey:'7668ebcd-20c1-49e4-8124-cbea98b6c330',
-			// 	sign: hex_md5(this.timestamp
-			// 	+this.appKey
-			// 	+this.clientType),
-			// 	clientType:3
-			// };
-			var paramsApi = [{name:'username',value:'cochlea'}];
-			var paramsPublic = [
-				{name:'timestamp',value:dateFormat(new Date())},
-				{name:'appKey',value:'7668ebcd-20c1-49e4-8124-cbea98b6c330'},
-				{name:'sign',value : hex_md5(getSignString(paramsPublic,paramsApi))},
-				{name:'clientType',value:3}
-			];
-			console.log(hex_md5(getSignString(paramsPublic,paramsApi)));
-			// console.log(paramsPublic.sort(function(a,b){return a.name>b.name}));
-
-		}
 		function arrayMerge(paramsPublic,paramApi) {
 			var pArray = [];
 			for (var key in paramsPublic){
@@ -58,7 +37,9 @@
 			return pArray;
 		}
 		function getSignString(paramsPublic,paramApi){
+			console.log("getSignString start");
 			var signString="";
+			signString += paramsPublic[0].value;//appsecret
 			var pArray = arrayParamMerge(paramsPublic,paramApi);
 			pArray.sort(function(a,b){
 				return a.name>b.name;
@@ -66,35 +47,28 @@
 			for(var k in pArray){
 				signString+=pArray[k].name + pArray[k].value;
 			};
-			return signString;
+			console.log(signString);
+			console.log('MD5:',calcMD5(signString));
+			console.log("getSignString end");
+			return hex_md5(signString);
 		}
-		function dateFormat(myDate){
-			// var myDate = new Date();
-			var myDateArray = []
-			var myDateFormat ="";
-			myDateArray.push(myDate.getFullYear());
-			myDateArray.push(myDate.getMonth());
-			myDateArray.push(myDate.getDate());
-			myDateArray.push(myDate.getHours());
-			myDateArray.push(myDate.getMinutes());
-			myDateArray.push(myDate.getSeconds());
-			for(var i = 0; i < 3; i++){
-					if(i == 2){
-						myDateFormat+=myDateArray[i]+" ";
-					} else {
-						myDateFormat += myDateArray[i] + "-";		
-					}
-			};
-			for(var i = 3; i < myDateArray.length; i++){
-					if(i == myDateArray.length-1){
-						myDateFormat += myDateArray[i];
-						break;
-					} else {
-						myDateFormat += myDateArray[i] + ":";	
-					}				
-			};
-			return myDateFormat;
+
+		Date.prototype.Format = function (fmt) { //author: meizz 
+		    var o = {
+		        "M+": this.getMonth() + 1, //月份 
+		        "d+": this.getDate(), //日 
+		        "h+": this.getHours(), //小时 
+		        "m+": this.getMinutes(), //分 
+		        "s+": this.getSeconds(), //秒 
+		        "q+": Math.floor((this.getMonth() + 3) / 3), //季度 
+		        "S": this.getMilliseconds() //毫秒 
+		    };
+		    if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+		    for (var k in o)
+		    if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+		    return fmt;
 		}
+
 		function XHR() {
 			var xhr;
 				try {xhr = new XMLHttpRequest();}
@@ -110,13 +84,15 @@
 		function getData() {
 			var xhr = XHR();
 			var paramsApi = [{name:'username',value:'cochlea'}];
-			var signValue = hex_md5(getSignString(paramsPublic,paramsApi));
 			var paramsPublic = [
-				{name:'timestamp',value:dateFormat(new Date())},
+				{name:'appsecret',value:'d41904c9-58af-4f1d-9407-de6902f71ac1'},
+				{name:'timestamp',value:new Date().Format("yyyy-MM-dd hh:mm:ss")},
 				{name:'appKey',value:'7668ebcd-20c1-49e4-8124-cbea98b6c330'},
 				{name:'clientType',value:3}
 			];
-			var paramsSign = [{name:'sign',value:hex_md5(getSignString(paramsPublic,paramsApi))}]
+			var signValue = getSignString(paramsPublic,paramsApi);
+			console.log(signValue);		
+			var paramsSign = [{name:'sign',value:signValue}]
 			var paramString = "";
 			var pmArray = arrayMerge(arrayMerge(paramsPublic,paramsSign),paramsApi);
 			for (var i = 0; i < pmArray.length; i++){
@@ -143,19 +119,24 @@
 		function parseRes(data){
 			var o = JSON.parse(data);
 			return o;
-		}0
+		}
 		function boundElement(data){
 			var oUl = document.getElementById('ul1');
 			var html = '';
-			for (var i =0; i<data.retData.length;i++){
-				html+='<ul>';
-				for (var k in data.retData[i]){
-					html += '<li>' +(data.retData[i])[k] + '</li>';
-				};
-				html +='</ul>';
-			}
+			html+='<li>'+data.code+'</li>';
 			oUl.innerHTML = html;
 		}
+		window.onload= function(){
+			// var paramsApi = [{name:'username',value:'cochlea'}];
+			// var paramsPublic = [
+			// 	{name:'timestamp',value:new Date().Format("yyyy-MM-dd hh:mm:ss")},
+			// 	{name:'appKey',value:'7668ebcd-20c1-49e4-8124-cbea98b6c330'},
+			// 	{name:'clientType',value:3}
+			// ];
+			// var signValue = hex_md5(getSignString(paramsPublic,paramsApi));
+			// var paramsSign = [{name:'sign',value:signValue}]
+			// console.log(signValue);
+		}		
 	</script>
 </head>
 <body>
